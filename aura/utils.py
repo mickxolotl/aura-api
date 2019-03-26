@@ -7,17 +7,6 @@ import requests
 logger = logging.getLogger('aura')
 
 
-class TimeoutRequestsSession(requests.Session):
-    def __init__(self, timeout=None):
-        super(TimeoutRequestsSession, self).__init__()
-        self._timeout = timeout
-
-    def request(self, *args, **kwargs):  # 8
-        if kwargs.get('timeout') is None or len(args) > 8:
-            kwargs['timeout'] = self._timeout
-        return super(TimeoutRequestsSession, self).request(*args, **kwargs)
-
-
 class Dummy:
     def __init__(self, dictionary=None):
         if dictionary is None:
