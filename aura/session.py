@@ -4,8 +4,8 @@ import requests
 import json
 
 from .config import config
-from .exceptions import AuraAPIError, AuraAuthError
-from .utils import json_iter_parse
+from .exceptions import AuraAPIError, AuraAuthError, AuraException
+from .utils import Dummy
 
 logger = logging.getLogger('aura')
 
@@ -34,25 +34,39 @@ class Session:
         self._session.headers['x-csrf-token'] = resp.headers.get('X-Csrf-Token')
         self.usable = True
 
-    def make_request(self, method, data):
-        print('%s %s%s %s' % (method.suggested_http_method, self.API_URL, method, data))
-        if method.api.app_version:
-            params = {'appVersion': method.api.app_version}
+    def make_request(self, method, data, forced_method=False):
+        logger.debug('%s %s%s %s' % (method._suggested_http_method, self.API_URL, method, data))
+
+        if method._api._app_version:
+            params = {'appVersion': method._api._app_version}
         else:
             params = {}
 
-        if method.suggested_http_method == 'GET':
+        if method._suggested_http_method == 'GET':
             params.update(data)
             body = None
         else:
             body = json.dumps(data)
 
-        _resp = self._session.request(method.suggested_http_method, self.API_URL + method.method_name,
+        _resp = self._session.request(method._suggested_http_method, self.API_URL + method._method_name,
                                       params=params, json=body, timeout=config.HTTP_TIMEOUT)
+        resp = _resp.json(object_hook=Dummy)
 
-        resp = next(json_iter_parse(_resp.text))
         if resp.code == 200:
-            return resp.data
+            return resp.get('data', Dummy())
+
+        elif resp.errors == 'CSRF_INVALID':
+            logger.debug('Updating CSRF token')
+            self.update_csrf()
+            return self.make_request(method, data, forced_method)
+
+        elif config.HTTP_METHOD_CORRECTION and resp.errors == 'Invalid action' and not forced_method:
+            method._suggested_http_method = 'POST' if method._suggested_http_method == 'GET' else 'GET'
+            result = self.make_request(method, data, forced_method=True)
+            logger.warning('Invalid HTTP method suggestion for %s. Corrected: %s' %
+                           (method._method_name, method._suggested_http_method))
+            return result
+
         else:
             raise AuraAPIError(resp)
 
@@ -65,6 +79,17 @@ class AuthSession(Session):
         super(AuthSession, self).__init__()
         self.login = login
         self.password = password
+
+    def get_cookie_session_args(self):
+        args = {
+            'session_id': self._session.cookies.get('Session_id'),
+            'yandexuid': self._session.cookies.get('yandexuid'),
+        }
+
+        if not all(args.values()):
+            raise AuraAuthError('User is not authorized')
+
+        return args
 
 
 class CookieSession(Session):

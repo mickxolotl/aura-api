@@ -1,8 +1,5 @@
 # -*- coding: utf-8 -*-
-import json
 import logging
-
-import requests
 
 logger = logging.getLogger('aura')
 
@@ -43,11 +40,3 @@ class Dummy:
     @property
     def as_dict(self):
         return self._dict
-
-
-def json_iter_parse(response_text):
-    decoder = json.JSONDecoder(strict=False, object_hook=Dummy)
-    idx = 0
-    while idx < len(response_text):
-        obj, idx = decoder.raw_decode(response_text, idx)
-        yield obj
