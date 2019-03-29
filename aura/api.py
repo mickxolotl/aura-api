@@ -44,6 +44,9 @@ class Method:
         return Method(self._api, self._method_name + str(variable), self._suggested_http_method)
 
     def __call__(self, _http_method=None, **kwargs):
+        if self._method_name == 'getdoc/':
+            return  # IDE вызывает этот метод. не знаю, как иначе предотвратить нежелательные запросы
+
         if _http_method:
             self._suggested_http_method = _http_method
         elif kwargs:

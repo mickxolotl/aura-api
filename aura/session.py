@@ -75,6 +75,10 @@ class Session:
 class AuthSession(Session):
     """
     Сессия, имитирующая авторизацию по логину-паролю
+
+    Вместо неё лучше использовать CookieSession, т.к. частая авторизация
+    может выглядеть подозрительно. Аргументы для CookieSession можно получить
+    методом get_cookie_session_args объекта класса AuthSession
     """
     AUTH_URL = 'https://passport.yandex.ru/auth'
     PROFILE_URL = 'https://passport.yandex.ru/profile'
@@ -86,6 +90,7 @@ class AuthSession(Session):
 
         self.sign_in()
         self.update_csrf()
+        logger.warning('It would be better to use CookieSession. Arguments for it can be obtained by the `get_cookie_session_args` method of an AuthSession.')
 
     def sign_in(self):
         data = {
