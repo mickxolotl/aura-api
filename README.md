@@ -5,7 +5,7 @@ Python API для работы с Яндекс.Аура
 **В разработке**
 
 
-##Установка
+## Установка
 Требуется Python 3, тестировалось на Python 3.7
 
 * Установка с помощью pip
@@ -20,7 +20,7 @@ cd aura-api
 python3 setup.py install
 ```
 
-##Использование
+## Использование
 
 Примеры использования можно найти в каталоге [examples](https://github.com/mickxolotl/aura-api/tree/master/examples)
 
