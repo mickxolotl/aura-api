@@ -2,6 +2,7 @@
 import logging
 import threading
 import time
+import json
 
 from .config import config
 
@@ -52,6 +53,10 @@ class Method:
             self._suggested_http_method = _http_method
         elif kwargs:
             self._suggested_http_method = 'GET' if 'page' in kwargs else 'POST'
+
+        for k, v in kwargs.items():
+            if isinstance(v, list) or isinstance(v, tuple):
+                kwargs[k] = json.dumps(v)
 
         with self._api._threading_lock:
             time.sleep(max(0, self._api._last_request + self._api._delay - time.time()))

@@ -6,7 +6,7 @@ def read(filename):
         return file.read()
 
 setup(name='aura-api',
-      version='1.0',
+      version='1.0.2',
       description='Python API for Yandex.Aura',
       long_description=read('README.md'),
       long_description_content_type="text/markdown",
