@@ -19,6 +19,7 @@ class Session:
         self._session.headers['User-Agent'] = config.USER_AGENT
         self._session.headers['Content-Type'] = 'application/x-www-form-urlencoded'
         self._session.headers['X-Requested-With'] = 'ru.yandex.searchplugin'
+        self._session.headers['Accept-Language'] = 'ru-RU,ru;q=0.9,en-US;q=0.8,en;q=0.7'
 
         self.usable = False  # остается задать Session_id и yandexuid куки
 
@@ -46,10 +47,10 @@ class Session:
             params.update(data)
             body = None
         else:
-            body = json.dumps(data)
+            body = data
 
         _resp = self._session.request(method._suggested_http_method, self.API_URL + method._method_name,
-                                      params=params, json=body, timeout=config.HTTP_TIMEOUT)
+                                      params=params, data=body, timeout=config.HTTP_TIMEOUT)
         resp = _resp.json(object_hook=Dummy)
 
         if resp.code == 200:
@@ -75,10 +76,43 @@ class AuthSession(Session):
     """
     Сессия, имитирующая авторизацию по логину-паролю
     """
+    AUTH_URL = 'https://passport.yandex.ru/auth'
+    PROFILE_URL = 'https://passport.yandex.ru/profile'
+
     def __init__(self, login, password):
         super(AuthSession, self).__init__()
         self.login = login
         self.password = password
+
+        self.sign_in()
+        self.update_csrf()
+
+    def sign_in(self):
+        data = {
+            'login': self.login,
+            'passwd': self.password,
+            # 'retpath': url
+        }
+        resp = self._session.post(self.AUTH_URL, data)
+        if resp.url == self.PROFILE_URL:
+            return
+
+        if resp.url == self.AUTH_URL:
+            if 'Нет аккаунта с таким логином' in resp.text:
+                raise AuraAuthError('Wrong login')
+            if 'Неправильный логин или пароль' in resp.text:
+                raise AuraAuthError('Wrong password')
+
+            raise AuraAuthError('Unknown auth error')
+
+        # Тут может быть страница с подтверждением телефона или кода 2fa
+        # проверим, удалось ли авторизоваться
+        logger.debug('possible 2fa')
+
+        resp = self._session.get(self.PROFILE_URL)
+
+        if resp.url != self.PROFILE_URL:
+            raise AuraAuthError('Unknown auth error. 2fa accounts are not supported, try CookieSession')
 
     def get_cookie_session_args(self):
         args = {

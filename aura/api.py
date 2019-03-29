@@ -38,10 +38,10 @@ class Method:
 
     def __getattr__(self, method_name):
         suggested_http_method = 'POST' if method_name in POST_KEYWORDS else self._suggested_http_method
-        return Method(self._api, self._method_name + method_name, suggested_http_method)
+        return Method(self._api, self._method_name + str(method_name), suggested_http_method)
 
     def __getitem__(self, variable):
-        return Method(self._api, self._method_name + variable, self._suggested_http_method)
+        return Method(self._api, self._method_name + str(variable), self._suggested_http_method)
 
     def __call__(self, _http_method=None, **kwargs):
         if _http_method:
