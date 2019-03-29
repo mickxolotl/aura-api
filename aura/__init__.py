@@ -7,5 +7,3 @@ from . import exceptions
 from .api import API
 from .config import configure
 from .session import AuthSession, CookieSession
-
-name = 'aura-api'
