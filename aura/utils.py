@@ -10,18 +10,28 @@ class Colors:
         1: 'black',
         2: 'yellow',
         3: 'red',
+        4: 'orange',
+        5: 'blue',
+        6: 'green',
         19: 'blue gradient',
         20: 'green gradient',
+        26: 'white gradient',
         46: 'purple gradient',
+        61: 'gradient',
     }
 
     WHITE = 0
     BLACK = 1
     YELLOW = 2
     RED = 3
+    ORANGE = 4
+    BLUE = 5
+    GREEN = 6
     BLUE_GRADIENT = 19
     GREEN_GRADIENT = 20
+    WHITE_GRADIENT = 26
     PURPLE_GRADIENT = 46
+    GRADIENT = 61
 
 
 class Dummy:
