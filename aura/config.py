@@ -17,6 +17,7 @@ class BasicConfig:
 
 config = BasicConfig
 
+
 def configure(**kwargs):
     fields = [x for x in config.__dict__.keys() if not x.startswith('__')]
     for k, v in kwargs.items():

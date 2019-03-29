@@ -1,7 +1,6 @@
 # -*- coding: utf-8 -*-
 import logging
 import requests
-import json
 
 from .config import config
 from .exceptions import AuraAPIError, AuraAuthError, AuraException
@@ -36,6 +35,9 @@ class Session:
         self.usable = True
 
     def make_request(self, method, data, forced_method=False):
+        if not self.usable:
+            raise AuraException('Session invalid')
+
         logger.debug('%s %s%s %s' % (method._suggested_http_method, self.API_URL, method, data))
 
         if method._api._app_version:
@@ -90,7 +92,8 @@ class AuthSession(Session):
 
         self.sign_in()
         self.update_csrf()
-        logger.warning('It would be better to use CookieSession. Arguments for it can be obtained by the `get_cookie_session_args` method of an AuthSession.')
+        logger.warning('It would be better to use CookieSession. '
+                       'Arguments for it can be obtained by the `get_cookie_session_args` method of an AuthSession.')
 
     def sign_in(self):
         data = {
@@ -135,9 +138,9 @@ class CookieSession(Session):
     """
     Сессия, использующая Session_id и yandexuid куки вместо авторизации по логину-паролю
     """
+
     def __init__(self, session_id, yandexuid):
         super(CookieSession, self).__init__()
         self._session.cookies.update({'Session_id': session_id, 'yandexuid': yandexuid})
 
         self.update_csrf()
-
