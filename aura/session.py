@@ -54,7 +54,7 @@ class Session:
         try:
             _resp = self._session.request(method._suggested_http_method, self.API_URL + method._method_name,
                                           params=params, data=body, timeout=config.HTTP_TIMEOUT)
-        except ConnectionError:
+        except requests.exceptions.ConnectionError:
             raise AuraException('Connection has been aborted. Possibly invalid API method.')
 
         if _resp.status_code == 405 and _resp.reason == 'Method Not Allowed':
@@ -66,6 +66,9 @@ class Session:
 
         if resp.code == 200:
             return resp.get('data', Dummy())
+
+        if 'errors' not in resp:
+            resp.errors = 'Forbidden'
 
         elif resp.errors == 'CSRF_INVALID':
             logger.debug('Updating CSRF token')
@@ -79,8 +82,7 @@ class Session:
                            (method._method_name, method._suggested_http_method))
             return result
 
-        else:
-            raise AuraAPIError(resp)
+        raise AuraAPIError(resp)
 
 
 class AuthSession(Session):

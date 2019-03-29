@@ -8,7 +8,7 @@ from .config import config
 logger = logging.getLogger('aura')
 
 POST_KEYWORDS = ['recover_profile', 'delete_profile', 'tutorial', 'feedback', 'upload_ava', 'update_info',
-                 'subscribe', 'unsubscribe', 'favorite', 'complain', 'delete_comment', 'delete', 'edit', 'addpost',
+                 'subscribe', 'unsubscribe', 'favorite', 'complain', 'delete_comment', 'delete', 'edit', 'addpost_new',
                  'author_from_feed', 'feed', 'smartmatching_on', 'smartmatching_off', 'smartmatching',
                  'rate_user', 'smartmatching_open', 'upload_attachment', 'settings', 'invite', 'suggest']  # 11500
 
@@ -45,7 +45,7 @@ class Method:
         return Method(self._api, self._method_name + str(variable), self._suggested_http_method)
 
     def __call__(self, _http_method=None, **kwargs):
-        if self._method_name == 'getdoc/':
+        if self._method_name.endswith('getdoc/'):
             return  # IDE вызывает этот метод. не знаю, как иначе предотвратить нежелательные запросы
 
         if _http_method:
@@ -56,6 +56,7 @@ class Method:
         with self._api._threading_lock:
             time.sleep(max(0, self._api._last_request + self._api._delay - time.time()))
             # ожидание на случай наличия лимитов на обращение к апи
+
             resp = self._api._session.make_request(self, kwargs, forced_method=_http_method)
             self._api._last_request = time.time()
 

@@ -4,14 +4,24 @@ import logging
 logger = logging.getLogger('aura')
 
 
-COLORS = {
-    1: 'black',
-    2: 'yellow',
-    3: 'red',
-    19: 'blue gradient',
-    20: 'green gradient',
-    46: 'purple gradient',
-}
+class Colors:
+    COLORS = {
+        0: 'white',
+        1: 'black',
+        2: 'yellow',
+        3: 'red',
+        19: 'blue gradient',
+        20: 'green gradient',
+        46: 'purple gradient',
+    }
+
+    WHITE = 0
+    BLACK = 1
+    YELLOW = 2
+    RED = 3
+    BLUE_GRADIENT = 19
+    GREEN_GRADIENT = 20
+    PURPLE_GRADIENT = 46
 
 
 class Dummy:
