@@ -51,8 +51,17 @@ class Session:
         else:
             body = data
 
-        _resp = self._session.request(method._suggested_http_method, self.API_URL + method._method_name,
-                                      params=params, data=body, timeout=config.HTTP_TIMEOUT)
+        try:
+            _resp = self._session.request(method._suggested_http_method, self.API_URL + method._method_name,
+                                          params=params, data=body, timeout=config.HTTP_TIMEOUT)
+        except ConnectionError:
+            raise AuraException('Connection has been aborted. Possibly invalid API method.')
+
+        if _resp.status_code == 405 and _resp.reason == 'Method Not Allowed':
+            raise AuraException('Invalid API method.')
+
+        _resp.raise_for_status()
+
         resp = _resp.json(object_hook=Dummy)
 
         if resp.code == 200:
@@ -110,6 +119,8 @@ class AuthSession(Session):
                 raise AuraAuthError('Wrong login')
             if 'Неправильный логин или пароль' in resp.text:
                 raise AuraAuthError('Wrong password')
+            # Возможно, не смотря на заголовки запроса текст документа все равно будет на другом языке,
+            # тогда ошибка авторизации не будет распознана
 
             raise AuraAuthError('Unknown auth error')
 

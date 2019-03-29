@@ -8,7 +8,7 @@ from .config import config
 logger = logging.getLogger('aura')
 
 POST_KEYWORDS = ['recover_profile', 'delete_profile', 'tutorial', 'feedback', 'upload_ava', 'update_info',
-                 'subscribe', 'unsubscribe', 'favorite', 'complain', 'delete_comment', 'delete', 'edit',
+                 'subscribe', 'unsubscribe', 'favorite', 'complain', 'delete_comment', 'delete', 'edit', 'addpost',
                  'author_from_feed', 'feed', 'smartmatching_on', 'smartmatching_off', 'smartmatching',
                  'rate_user', 'smartmatching_open', 'upload_attachment', 'settings', 'invite', 'suggest']  # 11500
 
@@ -22,7 +22,8 @@ class API:
         self._last_request = 0
 
     def __getattr__(self, method_name):
-        return Method(self, method_name)
+        suggested_http_method = 'POST' if method_name in POST_KEYWORDS else 'GET'
+        return Method(self, method_name, suggested_http_method)
 
     def __call__(self, method_name, http_method='GET', **method_kwargs):
         return getattr(self, method_name, http_method)(**method_kwargs)

@@ -4,6 +4,16 @@ import logging
 logger = logging.getLogger('aura')
 
 
+COLORS = {
+    1: 'black',
+    2: 'yellow',
+    3: 'red',
+    19: 'blue gradient',
+    20: 'green gradient',
+    46: 'purple gradient',
+}
+
+
 class Dummy:
     def __init__(self, dictionary=None):
         if dictionary is None:
